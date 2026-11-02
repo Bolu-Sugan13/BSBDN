@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Patient Access Audit Trail{% endblock %}
+{% block content %}
+<div style="max-width:900px;margin:0 auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div>
+      <h1 style="margin:0;">Data Access Audit Log</h1>
+      <p class="muted" style="margin:4px 0 0 0;">
+        A tamper-evident audit record of every access event to your medical records and digital twin.
+      </p>
+    </div>
+    <a class="btn btn-outline" href="{{ url_for('doctor_access') }}">Manage Doctor Permissions</a>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Accessed By</th>
+          <th>Role</th>
+          <th>Access Type</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in audit_entries %}
+        <tr>
+          <td class="muted" style="white-space:nowrap;">{{ entry.viewed_at }}</td>
+          <td>
+            <strong>{{ entry.viewer_name }}</strong>
+            <div class="muted" style="font-size:0.8rem;">{{ entry.viewer_email }}</div>
+          </td>
+          <td>
+            <span class="badge {{ 'green' if entry.viewer_role == 'doctor' else ('yellow' if entry.viewer_role == 'admin' else 'gray') }}">
+              {{ entry.viewer_role|upper }}
+            </span>
+          </td>
+          <td>
+            <code>{{ entry.access_type }}</code>
+          </td>
+          <td class="mono muted">{{ entry.ip_address or '127.0.0.1' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="muted" style="text-align:center;padding:24px;">
+            No external access events recorded yet. Only you have accessed your records.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

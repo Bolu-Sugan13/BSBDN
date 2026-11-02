@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h1>Vitals Analytics — {{ patient.name }}</h1>
+<p class="muted">Historical trends with a simple linear-trend projection for the next 5 readings (dashed).</p>
+
+<div class="card">
+  <h3>Heart rate (bpm)</h3>
+  <canvas id="hrChart" height="90"></canvas>
+</div>
+<div class="card">
+  <h3>Oxygen level — SpO2 (%)</h3>
+  <canvas id="spo2Chart" height="90"></canvas>
+</div>
+<div class="card">
+  <h3>Blood pressure (mmHg)</h3>
+  <canvas id="bpChart" height="90"></canvas>
+</div>
+
+<script>
+async function loadAnalytics() {
+  const res = await fetch("{{ url_for('api_vitals', patient_id=patient.id) }}");
+  const d = await res.json();
+
+  const allLabels = d.labels.concat(d.prediction.labels.map(l => "pred " + l));
+
+  function padPrediction(actual, predicted) {
+    return new Array(actual.length - 1).fill(null).concat([actual[actual.length - 1]]).concat(predicted);
+  }
+
+  new Chart(document.getElementById('hrChart'), {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [
+        { label: 'Heart rate', data: d.heart_rate.concat(new Array(d.prediction.labels.length).fill(null)), borderColor: '#1a1a1a', tension: 0.2 },
+        { label: 'Predicted', data: padPrediction(d.heart_rate, d.prediction.heart_rate), borderColor: '#b8860b', borderDash: [6,4], tension: 0.2 }
+      ]
+    },
+    options: { plugins: { legend: { display: true } } }
+  });
+
+  new Chart(document.getElementById('spo2Chart'), {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [
+        { label: 'SpO2', data: d.oxygen_level.concat(new Array(d.prediction.labels.length).fill(null)), borderColor: '#2e8b57', tension: 0.2 },
+        { label: 'Predicted', data: padPrediction(d.oxygen_level, d.prediction.oxygen_level), borderColor: '#b8860b', borderDash: [6,4], tension: 0.2 }
+      ]
+    }
+  });
+
+  new Chart(document.getElementById('bpChart'), {
+    type: 'line',
+    data: {
+      labels: d.labels,
+      datasets: [
+        { label: 'Systolic', data: d.bp_sys, borderColor: '#c0392b', tension: 0.2 },
+        { label: 'Diastolic', data: d.bp_dia, borderColor: '#1a1a1a', tension: 0.2 }
+      ]
+    }
+  });
+}
+loadAnalytics();
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="card" style="max-width:420px;margin:40px auto;">
+  <h1>Create an account</h1>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Full name</label>
+    <input type="text" name="name" required placeholder="e.g. Alex Morgan">
+    <label>Email</label>
+    <input type="email" name="email" required placeholder="patient@example.com">
+    <label>Password</label>
+    <input type="password" name="password" required minlength="6" placeholder="At least 6 characters">
+    
+    <div style="background:#f4f6f8;padding:10px 12px;border-radius:4px;margin-bottom:14px;font-size:0.85rem;color:#555;">
+      ℹ️ <strong>Patient Portal Registration:</strong> This registration creates a secure Patient Digital Twin account. Healthcare provider (Doctor) accounts are issued and approved by system administration.
+    </div>
+
+    <button type="submit">Create Patient Account</button>
+  </form>
+  <p class="muted">Already have an account? <a href="{{ url_for('login') }}">Login</a>.</p>
+</div>
+{% endblock %}

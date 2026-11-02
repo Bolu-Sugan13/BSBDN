@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Doctor Access & Consent{% endblock %}
+{% block content %}
+<div style="max-width:800px;margin:0 auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div>
+      <h1 style="margin:0;">Doctor Access & Consent Management</h1>
+      <p class="muted" style="margin:4px 0 0 0;">
+        Under privacy and consent regulations, only medical practitioners you explicitly authorize can view your health records and digital twin.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Registered Healthcare Providers</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Doctor</th>
+          <th>Contact</th>
+          <th>Consent Status</th>
+          <th>Last Updated</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in doctors %}
+        <tr>
+          <td>
+            <strong>Dr. {{ doc.doctor_name }}</strong>
+          </td>
+          <td class="muted">{{ doc.doctor_email }}</td>
+          <td>
+            {% if doc.status == 'approved' %}
+              <span class="badge green">✓ Authorized</span>
+            {% elif doc.status == 'revoked' %}
+              <span class="badge red">✕ Access Revoked</span>
+            {% else %}
+              <span class="badge gray">No Access</span>
+            {% endif %}
+          </td>
+          <td class="muted">{{ doc.updated_at or 'Never' }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('toggle_doctor_access') }}" style="margin:0;display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="doctor_id" value="{{ doc.doctor_id }}">
+              {% if doc.status == 'approved' %}
+                <input type="hidden" name="action" value="revoke">
+                <button type="submit" class="btn btn-outline" style="color:#c0392b;border-color:#f0c4bd;padding:5px 12px;font-size:0.85rem;">Revoke Access</button>
+              {% else %}
+                <input type="hidden" name="action" value="grant">
+                <button type="submit" class="btn" style="background:#2e8b57;padding:5px 12px;font-size:0.85rem;">Grant Access</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="muted" style="text-align:center;padding:24px;">No doctors are currently registered in the network.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:20px;background:#f8f9fa;">
+    <h4>Privacy &amp; Security Note</h4>
+    <p class="muted" style="margin:0;font-size:0.88rem;">
+      When you grant access, the authorized doctor is allowed to review your digital twin vitals and trends.
+      Every consultation view is recorded into an immutable audit trail that you can inspect anytime on your
+      <a href="{{ url_for('audit_log_view') }}" style="color:#2e8b57;font-weight:600;">Audit Log</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}

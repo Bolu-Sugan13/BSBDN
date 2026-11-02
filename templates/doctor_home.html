@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<h1>My Patients</h1>
+<div class="card">
+  <table>
+    <tr><th>Name</th><th>Email</th><th>Status</th><th>Records</th><th>Last update</th><th></th></tr>
+    {% for row in patient_rows %}
+    <tr>
+      <td>{{ row.patient.name }}</td>
+      <td class="muted">{{ row.patient.email }}</td>
+      <td><span class="badge {{ row.status if row.status != 'no-data' else 'gray' }}">{{ row.status|upper }}</span></td>
+      <td>{{ row.patient.record_count }}</td>
+      <td class="muted">{{ row.patient.last_update or '—' }}</td>
+      <td><a class="btn btn-outline" href="{{ url_for('doctor_patient', patient_id=row.patient.id) }}">View</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">No patients registered yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

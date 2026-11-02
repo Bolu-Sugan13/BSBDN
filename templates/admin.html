@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+
+<div class="grid grid-3">
+  <div class="card stat"><div class="num">{{ users|length }}</div><div class="label">Users</div></div>
+  <div class="card stat"><div class="num">{{ record_total }}</div><div class="label">Health records</div></div>
+  <div class="card stat"><div class="num">{{ block_total }}</div><div class="label">Chain blocks</div></div>
+</div>
+
+<h2>Doctor Accounts &amp; Approvals</h2>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Register New Doctor</h3>
+    <form method="POST" action="{{ url_for('admin_create_doctor') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Doctor Full Name</label>
+      <input type="text" name="name" required placeholder="e.g. Dr. Priya Sharma">
+      <label>Email Address</label>
+      <input type="email" name="email" required placeholder="priya.sharma@hospital.org">
+      <label>Initial Password</label>
+      <input type="password" name="password" required minlength="6" placeholder="At least 6 characters">
+      <button type="submit" class="btn" style="background:#2e8b57;">Create Doctor Account</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Medical Practitioner Roster</h3>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for u in users if u.role == 'doctor' %}
+        <tr>
+          <td>Dr. {{ u.name }}</td>
+          <td class="muted">{{ u.email }}</td>
+          <td>
+            <span class="badge {{ 'green' if (u.status or 'active') == 'active' else 'yellow' }}">
+              {{ (u.status or 'active')|upper }}
+            </span>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('admin_toggle_doctor_status', user_id=u.id) }}" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if (u.status or 'active') == 'active' %}
+                <button type="submit" class="btn btn-outline" style="padding:4px 8px;font-size:0.8rem;color:#c0392b;">Suspend</button>
+              {% else %}
+                <button type="submit" class="btn" style="padding:4px 8px;font-size:0.8rem;background:#2e8b57;">Approve</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="muted">No doctor accounts registered yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>All System Users</h2>
+<div class="card">
+  <table>
+    <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.name }}</td>
+      <td class="muted">{{ u.email }}</td>
+      <td><span class="badge {{ 'green' if u.role == 'doctor' else ('yellow' if u.role == 'admin' else 'gray') }}">{{ u.role|upper }}</span></td>
+      <td><span class="badge {{ 'green' if (u.status or 'active') == 'active' else 'yellow' }}">{{ (u.status or 'active')|upper }}</span></td>
+      <td class="muted">{{ u.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<h2>Data integrity</h2>
+<div class="card">
+  <p class="muted">Recompute every block's hash and check the chain links to confirm no record has been altered.</p>
+  <a class="btn" href="{{ url_for('blockchain_view') }}">Go to blockchain timeline to run check</a>
+</div>
+
+<h2>Recent activity</h2>
+<div class="card">
+  <table>
+    <tr><th>User</th><th>Action</th><th>Details</th><th>When</th></tr>
+    {% for a in recent_activity %}
+    <tr><td>{{ a.name or 'system' }}</td><td>{{ a.action }}</td><td class="muted">{{ a.details }}</td><td class="muted">{{ a.created_at }}</td></tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No activity yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

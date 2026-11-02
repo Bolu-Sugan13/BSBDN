@@ -1,0 +1,27 @@
+
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Blockchain-Based Synthetic Bio-Digital Network</h1>
+  <p>A tamper-evident digital twin platform that consolidates wearable, hospital and self-reported
+     health data into one trustworthy, easy-to-read view — for patients and doctors alike.</p>
+  <a class="btn" href="{{ url_for('register') }}">Get Started</a>
+  <a class="btn btn-outline" href="{{ url_for('login') }}">Login</a>
+</div>
+
+<div class="grid grid-3">
+  <div class="card">
+    <h3>Digital Twin Dashboard</h3>
+    <p class="muted">Color-coded organ view (green / yellow / red) built from live vitals.</p>
+  </div>
+  <div class="card">
+    <h3>Tamper-Evident Records</h3>
+    <p class="muted">Every update is chained with SHA-256, so silent edits are detectable.</p>
+  </div>
+  <div class="card">
+    <h3>Trend &amp; Prediction</h3>
+    <p class="muted">Vitals history charted over time, with a simple trend-based forecast.</p>
+  </div>
+</div>
+{% endblock %}
